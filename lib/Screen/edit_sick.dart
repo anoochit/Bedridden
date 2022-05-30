@@ -429,6 +429,10 @@ class _EditSickState extends State<EditSick> {
 
   Future<Null> processEditData() async {
     // prepare data to your map so this should change to model
+    // var data = {
+    //   'name': nameController.text,
+    //    ...
+    // }
     map['name'] = nameController.text;
     map['address'] = addressController.text;
     map['idCard'] = idcardController.text;

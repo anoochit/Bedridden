@@ -108,21 +108,57 @@ class _EditSickState extends State<EditSick> {
           .orderBy('timestamp', descending: true)
           .get();
 
-      dev.log('${lastLog.docs.length}');
+      dev.log('found log data = ${lastLog.docs.length} items');
 
-      if (lastLog.docs.isEmpty) {
+      if (lastLog.docs.length == 0) {
         dev.log("read master data");
         // read master data
         dev.log('read from docId - ${widget.idcard}');
-        FirebaseFirestore.instance.collection('sick').doc(widget.idcard).get().then((event) {
+        FirebaseFirestore.instance.collection('sick').doc(widget.idcard).get().then((DocumentSnapshot event) {
           dev.log('read master data');
           DateTime dateTime = event['bond'].toDate();
-          DateFormat dateFormat = DateFormat('dd-MMMM-yyyy', 'th');
+          DateFormat dateFormat = DateFormat('dd-MM-yyyy');
           String bondStr = dateFormat.format(dateTime);
 
           // TODO : set data
-          dev.log(event["name"]);
-          nameController.text = event["name"];
+          // set screen state
+          setState(() {
+            // set default data in some field
+            addressSick = event['address'];
+
+            // show bone string in
+            bondStatus = true;
+            bondSick = bondStr;
+
+            // convert to date for bone field default data
+            pickedDate = event['bond'].toDate();
+            dev.log(pickedDate.toString());
+
+            idCardSick = event['idCard'];
+            latSick = event['lat'].toString();
+            lngSick = event['lng'].toString();
+            levelSick = event['level'];
+            nameSick = event['name'];
+            nationalitySick = event['nationality'];
+            patientoccupationSick = event['patientoccupation'];
+            phoneSick = event['phone'];
+            raceSick = event['race'];
+            religionSick = event['religion'];
+            talentSick = event['talent'];
+            typeSexSick = event['typeSex'];
+            typeStatusSick = event['typeStatus'];
+            typeeducationlevelSick = event['typeeducation_level'].toString();
+            typepositionSick = event['typeposition'].toString();
+            urlImageSick = event['urlImage'];
+
+            // set data to text controller field
+            nameController.text = event["name"];
+            addressController.text = event["address"];
+            idcardController.text = event["idCard"];
+            phoneController.text = event["phone"];
+            patientoccupationController.text = event["patientoccupation"];
+            talentController.text = event["talent"];
+          });
         });
       } else {
         // has log data
@@ -133,8 +169,44 @@ class _EditSickState extends State<EditSick> {
         String bondStr = dateFormat.format(dateTime);
 
         // TODO : set data
-        dev.log(event["name"]);
-        nameController.text = event["name"];
+        // set screen state
+        setState(() {
+          // set default data in some field
+          addressSick = event['address'];
+
+          // show bone string in
+          bondStatus = true;
+          bondSick = bondStr;
+
+          // convert to date for bone field default data
+          pickedDate = event['bond'].toDate();
+          dev.log(pickedDate.toString());
+
+          idCardSick = event['idCard'];
+          latSick = event['lat'].toString();
+          lngSick = event['lng'].toString();
+          levelSick = event['level'];
+          nameSick = event['name'];
+          nationalitySick = event['nationality'];
+          patientoccupationSick = event['patientoccupation'];
+          phoneSick = event['phone'];
+          raceSick = event['race'];
+          religionSick = event['religion'];
+          talentSick = event['talent'];
+          typeSexSick = event['typeSex'];
+          typeStatusSick = event['typeStatus'];
+          typeeducationlevelSick = event['typeeducation_level'].toString();
+          typepositionSick = event['typeposition'].toString();
+          urlImageSick = event['urlImage'];
+
+          // set data to text controller field
+          nameController.text = event["name"];
+          addressController.text = event["address"];
+          idcardController.text = event["idCard"];
+          phoneController.text = event["phone"];
+          patientoccupationController.text = event["patientoccupation"];
+          talentController.text = event["talent"];
+        });
       }
     });
   }
@@ -356,85 +428,77 @@ class _EditSickState extends State<EditSick> {
   }
 
   Future<Null> processEditData() async {
-    String sickImage = 'sick${Random().nextInt(1000000)}.jpg';
-    FirebaseStorage storage = FirebaseStorage.instance;
-    Reference reference = storage.ref().child('sick/$sickImage');
-    UploadTask task = reference.putFile(file!);
-    await task.whenComplete(() async {
-      await reference.getDownloadURL().then((value) async {
-        String urlImage = value.toString();
-        if (typeSexBol) {
-          map['typeSex'] = typeSexSick;
-        }
+    // prepare data to your map so this should change to model
+    map['name'] = nameController.text;
+    map['address'] = addressController.text;
+    map['idCard'] = idcardController.text;
+    map['phone'] = phoneController.text;
+    map['patientoccupation'] = patientoccupationController.text;
+    map['talent'] = talentController.text;
+    map['nationality'] = nationalitySick;
+    map['race'] = raceSick;
+    map['typeSex'] = typeSexSick;
+    map['typeStatus'] = typeStatusSick;
+    map['typeeducation_level'] = typeeducationlevelSick;
+    map['typeposition'] = typepositionSick;
+    map['religion'] = religionSick;
+    map['level'] = levelSick;
+    map['bond'] = pickedDate;
+    map['lat'] = lat;
+    map['lng'] = lng;
+    map['urlImage'] = urlImageSick;
 
-        if (typeStatusBol) {
-          map['typeStatus'] = typeStatusSick;
-        }
+    // save sub collection
+    String timeStamp = DateTime.now().millisecondsSinceEpoch.toString();
+    // add field timestamp to your map data
+    map['timestamp'] = timeStamp;
 
-        if (typeducationlevel) {
-          map['typeeducation_level'] = typeeducationlevelSick;
-        }
+    // check file is null or not, if file is null so user don't upload image
+    if (file == null) {
+      dev.log("file is null so, don't upload image just save data only");
 
-        if (typeposition) {
-          map['typeposition'] = typepositionSick;
-        }
+      dev.log('### map ==>> $map');
 
-        if (typereligions) {
-          map['religion'] = religionSick;
-        }
-
-        if (typelevel) {
-          map['level'] = levelSick;
-        }
-
-        if (file != null) {
-          map['urlImage'] = urlImage;
-        }
-
-        map['bond'] = pickedDate;
-        map['lat'] = lat;
-        map['lng'] = lng;
-
-        print('### map ==>> $map');
-        if (map.isEmpty) {
-          normalDialog(context, 'ไม่มีการเปลี่ยนแปลง');
-        } else {
-          // save data to firebase
-          await Firebase.initializeApp().then((value) async {
-            // save master collection
-            // await FirebaseFirestore.instance
-            //     .collection('sick')
-            //     .doc(widget.idcard)
-            //     .update(map)
-            //     .then((value) => Navigator.pop(context));
-
-            // TODO : save sub collection
-            String timeStamp = DateTime.now().millisecondsSinceEpoch.toString();
-
-            /* TODO for drop down menu 
-            // drop down data
-            FirebaseFirestore.instance.collection('sick').doc(widget.idcard).collection('logs').get();
-
-            // get sub collection data
-            FirebaseFirestore.instance
-                .collection('sick')
-                .doc(widget.idcard)
-                .collection('logs')
-                .doc(dropDownValue)
-                .get();
-
-            await FirebaseFirestore.instance
-                .collection('sick')
-                .doc(widget.idcard)
-                .collection('logs')
-                .doc(timeStamp)
-                .set(map)
-                .then((value) => Navigator.pop(context));
-            
-            */
-          });
-        }
+      // save data to firestore
+      await Firebase.initializeApp().then((value) async {
+        // add to log data
+        saveData(map: map, timeStamp: timeStamp);
       });
+    } else {
+      dev.log("file is not null so, upload image and save data");
+      // upload file then add data to firesore
+      String sickImage = 'sick${Random().nextInt(1000000)}.jpg';
+      FirebaseStorage storage = FirebaseStorage.instance;
+      Reference reference = storage.ref().child('sick/$sickImage');
+      UploadTask task = reference.putFile(file!);
+      await task.whenComplete(() async {
+        await reference.getDownloadURL().then((value) async {
+          String urlImage = value.toString();
+
+          // set map data with new url image
+          if (file != null) {
+            map['urlImage'] = urlImage;
+          }
+
+          dev.log('### map ==>> $map');
+          // add to log data
+          saveData(map: map, timeStamp: timeStamp);
+        });
+      });
+    }
+  }
+
+  // save data to firestore
+  saveData({required Map<String, dynamic> map, required String timeStamp}) async {
+    await Firebase.initializeApp().then((value) async {
+      // add to log data
+      await FirebaseFirestore.instance
+          .collection('sick')
+          .doc(widget.idcard)
+          .collection('logs')
+          .doc(timeStamp)
+          .set(map)
+          .then((value) => Navigator.pop(context));
     });
   }
 

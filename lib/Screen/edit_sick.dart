@@ -1,3 +1,6 @@
+// add developer for log message
+import 'dart:developer' as dev;
+
 import 'package:bedridden/utility/dialog.dart';
 import 'package:bedridden/widgets/show_progess.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -21,6 +24,7 @@ class EditSick extends StatefulWidget {
 }
 
 class _EditSickState extends State<EditSick> {
+  // text edit controller
   TextEditingController nameController = TextEditingController();
   TextEditingController idcardController = TextEditingController();
   TextEditingController addressController = TextEditingController();
@@ -86,46 +90,52 @@ class _EditSickState extends State<EditSick> {
   void initState() {
     super.initState();
     print(widget.idcard);
-    readAlldata();
-    pickedDate = DateTime.now();
-    checkPermission();
+    readAlldata(); // read master collection (check log exist ? read last log : read all data)
+    pickedDate = DateTime.now(); // pickup timestamp
+    checkPermission(); // user
     Intl.defaultLocale = 'th';
     initializeDateFormatting();
   }
 
   Future<Null> readAlldata() async {
+    // init firebase
     await Firebase.initializeApp().then((value) async {
-      FirebaseFirestore.instance
+      // TODO : let's check log exist ?
+      QuerySnapshot lastLog = await FirebaseFirestore.instance
           .collection('sick')
           .doc(widget.idcard)
-          .snapshots()
-          .listen((event) {
+          .collection('logs')
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      dev.log('${lastLog.docs.length}');
+
+      if (lastLog.docs.isEmpty) {
+        dev.log("read master data");
+        // read master data
+        dev.log('read from docId - ${widget.idcard}');
+        FirebaseFirestore.instance.collection('sick').doc(widget.idcard).get().then((event) {
+          dev.log('read master data');
+          DateTime dateTime = event['bond'].toDate();
+          DateFormat dateFormat = DateFormat('dd-MMMM-yyyy', 'th');
+          String bondStr = dateFormat.format(dateTime);
+
+          // TODO : set data
+          dev.log(event["name"]);
+          nameController.text = event["name"];
+        });
+      } else {
+        // has log data
+        QueryDocumentSnapshot event = lastLog.docs.first;
+        // make a fordate time
         DateTime dateTime = event['bond'].toDate();
         DateFormat dateFormat = DateFormat('dd-MMMM-yyyy', 'th');
         String bondStr = dateFormat.format(dateTime);
-        Future.delayed(const Duration(seconds: 1), () {
-          setState(() {
-            addressSick = event['address'];
-            bondSick = bondStr;
-            idCardSick = event['idCard'];
-            latSick = event['lat'].toString();
-            lngSick = event['lng'].toString();
-            levelSick = event['level'];
-            nameSick = event['name'];
-            nationalitySick = event['nationality'];
-            patientoccupationSick = event['patientoccupation'];
-            phoneSick = event['phone'];
-            raceSick = event['race'];
-            religionSick = event['religion'];
-            talentSick = event['talent'];
-            typeSexSick = event['typeSex'];
-            typeStatusSick = event['typeStatus'];
-            typeeducationlevelSick = event['typeeducation_level'].toString();
-            typepositionSick = event['typeposition'].toString();
-            urlImageSick = event['urlImage'];
-          });
-        });
-      });
+
+        // TODO : set data
+        dev.log(event["name"]);
+        nameController.text = event["name"];
+      }
     });
   }
 
@@ -140,16 +150,14 @@ class _EditSickState extends State<EditSick> {
       if (permission == LocationPermission.denied) {
         LocationPermission permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.deniedForever) {
-          MyDialog().alertLocationService(
-              context, 'ไม่อนุญาติแชร์ Location', 'โปรดแชร์ Location');
+          MyDialog().alertLocationService(context, 'ไม่อนุญาติแชร์ Location', 'โปรดแชร์ Location');
         } else {
           // Find LatLang
           findLatLng();
         }
       } else {
         if (permission == LocationPermission.deniedForever) {
-          MyDialog().alertLocationService(
-              context, 'ไม่อนุญาติแชร์ Location', 'โปรดแชร์ Location');
+          MyDialog().alertLocationService(context, 'ไม่อนุญาติแชร์ Location', 'โปรดแชร์ Location');
         } else {
           // Find LatLng
           findLatLng();
@@ -157,8 +165,7 @@ class _EditSickState extends State<EditSick> {
       }
     } else {
       print('Service Location Close');
-      MyDialog().alertLocationService(context, 'Location Service ปิดอยู่ ?',
-          'กรุณาเปิด Location Service ด้วยคะ');
+      MyDialog().alertLocationService(context, 'Location Service ปิดอยู่ ?', 'กรุณาเปิด Location Service ด้วยคะ');
     }
   }
 
@@ -268,6 +275,7 @@ class _EditSickState extends State<EditSick> {
           ),
         ),
         actions: [
+          // save button
           IconButton(
               onPressed: () {
                 processEditData();
@@ -341,8 +349,7 @@ class _EditSickState extends State<EditSick> {
     return ListTile(
       title: bondStatus
           ? Text('$bondSick')
-          : Text(
-              "วัน/เดือน/ปีเกิด : ${pickedDate.day} , ${pickedDate.month} , ${pickedDate.year}"),
+          : Text("วัน/เดือน/ปีเกิด : ${pickedDate.day} , ${pickedDate.month} , ${pickedDate.year}"),
       trailing: Icon(Icons.keyboard_arrow_down),
       onTap: _pickDate,
     );
@@ -392,12 +399,39 @@ class _EditSickState extends State<EditSick> {
         if (map.isEmpty) {
           normalDialog(context, 'ไม่มีการเปลี่ยนแปลง');
         } else {
+          // save data to firebase
           await Firebase.initializeApp().then((value) async {
+            // save master collection
+            // await FirebaseFirestore.instance
+            //     .collection('sick')
+            //     .doc(widget.idcard)
+            //     .update(map)
+            //     .then((value) => Navigator.pop(context));
+
+            // TODO : save sub collection
+            String timeStamp = DateTime.now().millisecondsSinceEpoch.toString();
+
+            /* TODO for drop down menu 
+            // drop down data
+            FirebaseFirestore.instance.collection('sick').doc(widget.idcard).collection('logs').get();
+
+            // get sub collection data
+            FirebaseFirestore.instance
+                .collection('sick')
+                .doc(widget.idcard)
+                .collection('logs')
+                .doc(dropDownValue)
+                .get();
+
             await FirebaseFirestore.instance
                 .collection('sick')
                 .doc(widget.idcard)
-                .update(map)
+                .collection('logs')
+                .doc(timeStamp)
+                .set(map)
                 .then((value) => Navigator.pop(context));
+            
+            */
           });
         }
       });
@@ -408,8 +442,7 @@ class _EditSickState extends State<EditSick> {
         Marker(
           markerId: MarkerId('id'),
           position: LatLng(lat!, lng!),
-          infoWindow: InfoWindow(
-              title: 'พิกัด ' + '$nameSick', snippet: 'Lat = $lat, lng = $lng'),
+          infoWindow: InfoWindow(title: 'พิกัด ' + '$nameSick', snippet: 'Lat = $lat, lng = $lng'),
         ),
       }.toSet();
 
@@ -907,8 +940,7 @@ class _EditSickState extends State<EditSick> {
       children: [
         Row(
           children: [
-            Text('สถานภาพ :',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('สถานภาพ :', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ],
         ),
         RadioListTile(
@@ -1005,8 +1037,7 @@ class _EditSickState extends State<EditSick> {
   Row titleGendle() {
     return Row(
       children: [
-        Text('เพศ :',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text('เพศ :', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -1014,8 +1045,7 @@ class _EditSickState extends State<EditSick> {
   Row titleImage() {
     return Row(
       children: [
-        Text('รูปภาพผู้ป่วย :',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text('รูปภาพผู้ป่วย :', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -1024,9 +1054,7 @@ class _EditSickState extends State<EditSick> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        IconButton(
-            onPressed: () => confirmImageDialog(),
-            icon: Icon(Icons.add_photo_alternate)),
+        IconButton(onPressed: () => confirmImageDialog(), icon: Icon(Icons.add_photo_alternate)),
       ],
     );
   }
@@ -1059,8 +1087,7 @@ class _EditSickState extends State<EditSick> {
   Row titlebond() {
     return Row(
       children: [
-        Text('วัน/เดือน/ปีเกิด :',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text('วัน/เดือน/ปีเกิด :', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -1068,8 +1095,7 @@ class _EditSickState extends State<EditSick> {
   Row titlepatientoccupation() {
     return Row(
       children: [
-        Text('ก่อนป่วยติดเตียงผู้ป่วยมีอาชีพอะไร :',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text('ก่อนป่วยติดเตียงผู้ป่วยมีอาชีพอะไร :', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -1077,8 +1103,7 @@ class _EditSickState extends State<EditSick> {
   Row titleName() {
     return Row(
       children: [
-        Text('ชื่อ-นามสกุล :',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text('ชื่อ-นามสกุล :', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -1086,8 +1111,7 @@ class _EditSickState extends State<EditSick> {
   Row titleidcard() {
     return Row(
       children: [
-        Text('เลขบัตรประจำตัวประชาชน :',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text('เลขบัตรประจำตัวประชาชน :', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -1095,8 +1119,7 @@ class _EditSickState extends State<EditSick> {
   Row titleAddress() {
     return Row(
       children: [
-        Text('ที่อยู่ปัจจุบัน :',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text('ที่อยู่ปัจจุบัน :', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -1104,8 +1127,7 @@ class _EditSickState extends State<EditSick> {
   Row titlePhone() {
     return Row(
       children: [
-        Text('เบอร์โทรศัพท์ :',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text('เบอร์โทรศัพท์ :', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -1113,8 +1135,7 @@ class _EditSickState extends State<EditSick> {
   Row titletalent() {
     return Row(
       children: [
-        Text('ความสามารถพิเศษ :',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text('ความสามารถพิเศษ :', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -1159,12 +1180,12 @@ class _EditSickState extends State<EditSick> {
         map['name'] = value;
       },
       validator: (value) {
-            if (value!.isEmpty) {
-              return 'กรุณากรอก ชื่อ-นามสกุล';
-            } else {
-              return null;
-            }
-          },
+        if (value!.isEmpty) {
+          return 'กรุณากรอก ชื่อ-นามสกุล';
+        } else {
+          return null;
+        }
+      },
       controller: nameController,
       decoration: InputDecoration(border: OutlineInputBorder()),
     );
@@ -1200,12 +1221,12 @@ class _EditSickState extends State<EditSick> {
       },
       maxLines: 3,
       validator: (value) {
-            if (value!.isEmpty) {
-              return 'กรุณากรอก ที่อยู่ปัจจุบัน';
-            } else {
-              return null;
-            }
-          },
+        if (value!.isEmpty) {
+          return 'กรุณากรอก ที่อยู่ปัจจุบัน';
+        } else {
+          return null;
+        }
+      },
       controller: addressController,
       decoration: InputDecoration(border: OutlineInputBorder()),
     );

@@ -1,3 +1,4 @@
+import 'dart:developer' as dev;
 import 'dart:io';
 import 'dart:math';
 
@@ -106,8 +107,7 @@ class _LitlEditState extends State<LitlEdit> {
 
   _launchMap() async {
     print('mapppp $latSick $lngSick');
-    final String googleMapsUrl =
-        "https://www.google.com/maps/search/?api=1&query=$latSick,$lngSick";
+    final String googleMapsUrl = "https://www.google.com/maps/search/?api=1&query=$latSick,$lngSick";
 
     if (await canLaunch(googleMapsUrl)) {
       await launch(googleMapsUrl);
@@ -175,11 +175,7 @@ class _LitlEditState extends State<LitlEdit> {
       }
     });
     await Firebase.initializeApp().then((value) async {
-      FirebaseFirestore.instance
-          .collection('sick')
-          .doc(widget.idcard)
-          .snapshots()
-          .listen((event) {
+      FirebaseFirestore.instance.collection('sick').doc(widget.idcard).snapshots().listen((event) {
         DateTime dateTime = event['bond'].toDate();
         DateFormat dateFormat = DateFormat('dd-MMMM-yyyy', 'th');
         String bondStr = dateFormat.format(dateTime);
@@ -206,11 +202,7 @@ class _LitlEditState extends State<LitlEdit> {
           });
         });
       });
-      FirebaseFirestore.instance
-          .collection('Health')
-          .doc(widget.idcard)
-          .snapshots()
-          .listen((event) {
+      FirebaseFirestore.instance.collection('Health').doc(widget.idcard).snapshots().listen((event) {
         Future.delayed(const Duration(seconds: 1), () {
           setState(() {
             diseaseHealth = event['disease'];
@@ -222,11 +214,7 @@ class _LitlEditState extends State<LitlEdit> {
           });
         });
       });
-      FirebaseFirestore.instance
-          .collection('environment')
-          .doc('${widget.idcard}')
-          .snapshots()
-          .listen((event) {
+      FirebaseFirestore.instance.collection('environment').doc('${widget.idcard}').snapshots().listen((event) {
         Future.delayed(const Duration(seconds: 1), () {
           setState(() {
             accommodationenvironment = event['accommodation'];
@@ -239,11 +227,7 @@ class _LitlEditState extends State<LitlEdit> {
         });
       });
 
-      FirebaseFirestore.instance
-          .collection('Family')
-          .doc('${widget.idcard}')
-          .snapshots()
-          .listen((event) {
+      FirebaseFirestore.instance.collection('Family').doc('${widget.idcard}').snapshots().listen((event) {
         Future.delayed(const Duration(seconds: 1), () {
           setState(() {
             familynameoneFamily = event['familynameone'];
@@ -262,17 +246,15 @@ class _LitlEditState extends State<LitlEdit> {
         });
       });
 
-      FirebaseFirestore.instance
-          .collection('Curator')
-          .doc('${widget.idcard}')
-          .snapshots()
-          .listen((event) {
-        Future.delayed(const Duration(seconds: 1), () {
-          setState(() {
-            curatorName = event['curatorname'];
-            curatorAddress = event['curatoraddress'];
+      FirebaseFirestore.instance.collection('Curator').doc('${widget.idcard}').snapshots().listen((doc) {
+        if (doc.exists) {
+          Future.delayed(const Duration(seconds: 1), () {
+            setState(() {
+              curatorName = doc['curatorname'] ?? "";
+              curatorAddress = doc['curatoraddress'] ?? "";
+            });
           });
-        });
+        }
       });
     });
   }
@@ -291,9 +273,7 @@ class _LitlEditState extends State<LitlEdit> {
         ),
         backgroundColor: const Color(0xffdfad98),
         toolbarHeight: 90,
-        shape: RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.vertical(bottom: Radius.elliptical(30.0, 30.0))),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(bottom: Radius.elliptical(30.0, 30.0))),
       ),
       body: SingleChildScrollView(
           child: Padding(
@@ -323,15 +303,13 @@ class _LitlEditState extends State<LitlEdit> {
                         children: [
                           Text(
                             'ชื่อ',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                           SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               '$nameSick',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
@@ -341,14 +319,12 @@ class _LitlEditState extends State<LitlEdit> {
                         children: [
                           Text(
                             'ระดับ',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                           SizedBox(width: 10),
                           Text(
                             '$levelSick',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -367,8 +343,7 @@ class _LitlEditState extends State<LitlEdit> {
                       height: 50,
                     )),
               ),
-              Text("ส่วนที่ 1 ข้อมูลของผู้ป่วย",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("ส่วนที่ 1 ข้อมูลของผู้ป่วย", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               Expanded(
                 child: new Container(
                     margin: const EdgeInsets.only(left: 15.0, right: 10.0),
@@ -379,33 +354,27 @@ class _LitlEditState extends State<LitlEdit> {
               ),
             ]),
             SizedBox(height: 10),
-            Text('เลขบัตรประจำตัวประชาชน',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('เลขบัตรประจำตัวประชาชน', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$idCardSick', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('วัน/เดือน/ปีเกิด',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('วัน/เดือน/ปีเกิด', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$bondSick', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('เพศ',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('เพศ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$typeSexSick', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('สถานะ',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('สถานะ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$typeStatusSick', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('ที่อยู่ปัจจุบัน',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('ที่อยู่ปัจจุบัน', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$addressSick', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('พิกัดที่อยู่',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('พิกัดที่อยู่', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Row(
               children: [
@@ -420,43 +389,35 @@ class _LitlEditState extends State<LitlEdit> {
               ],
             ),
             SizedBox(height: 10),
-            Text('เบอร์โทรศัพท์',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('เบอร์โทรศัพท์', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$phoneSick', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('เชื้อชาติ',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('เชื้อชาติ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$raceSick', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('สัญชาติ',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('สัญชาติ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$nationalitySick', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('ศาสนา',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('ศาสนา', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$religionSick', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('ระดับการศึกษา',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('ระดับการศึกษา', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$typeeducationlevelSick', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('ก่อนป่วยติดเตียงผู้ป่วยทำอาชีพ',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('ก่อนป่วยติดเตียงผู้ป่วยทำอาชีพ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$patientoccupationSick', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('ความสามารถพิเศษ',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('ความสามารถพิเศษ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$talentSick', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('ฐานะของผู้และครอบครัว',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('ฐานะของผู้และครอบครัว', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$typepositionSick', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
@@ -469,8 +430,7 @@ class _LitlEditState extends State<LitlEdit> {
                       height: 50,
                     )),
               ),
-              Text("ส่วนที่ 2 ข้อมูลด้านสุขภาพ",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("ส่วนที่ 2 ข้อมูลด้านสุขภาพ", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               Expanded(
                 child: new Container(
                     margin: const EdgeInsets.only(left: 15.0, right: 10.0),
@@ -481,33 +441,27 @@ class _LitlEditState extends State<LitlEdit> {
               ),
             ]),
             SizedBox(height: 10),
-            Text('โรคประจำตัวหรือปัญหาสุขภาพ',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('โรคประจำตัวหรือปัญหาสุขภาพ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$diseaseHealth', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('ยาที่แพทย์สั่ง',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('ยาที่แพทย์สั่ง', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$medicineHealth', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('ผลการตรวจสอบ',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('ผลการตรวจสอบ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$groupAHealth', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('การใช้ยา',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('การใช้ยา', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$groupBHealth', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('สมุนไพร',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('สมุนไพร', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$herbHealth', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('อาหารเสริม',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('อาหารเสริม', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$foodsupplementHealth', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
@@ -520,8 +474,7 @@ class _LitlEditState extends State<LitlEdit> {
                       height: 50,
                     )),
               ),
-              Text("ส่วนที่ 3 ข้อมูลสภาพแวดล้อม",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("ส่วนที่ 3 ข้อมูลสภาพแวดล้อม", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               Expanded(
                 child: new Container(
                     margin: const EdgeInsets.only(left: 15.0, right: 10.0),
@@ -532,35 +485,27 @@ class _LitlEditState extends State<LitlEdit> {
               ),
             ]),
             SizedBox(height: 10),
-            Text('สถานะของที่พักอาศัย',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('สถานะของที่พักอาศัย', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$accommodationenvironment', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('ประเภทบ้าน',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('ประเภทบ้าน', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$typeHouseenvironment', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('สภาพสิ่งแวดล้อมในบ้าน',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('สภาพสิ่งแวดล้อมในบ้าน', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
-            Text('$typeHomeEnvironmentenvironment',
-                style: TextStyle(fontSize: 16)),
+            Text('$typeHomeEnvironmentenvironment', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('ความปลอดภัยของที่อยู่อาศัย',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('ความปลอดภัยของที่อยู่อาศัย', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
-            Text('$typeHousingSafetyenvironment',
-                style: TextStyle(fontSize: 16)),
+            Text('$typeHousingSafetyenvironment', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('สิ่งอำนวยความสะดวก',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('สิ่งอำนวยความสะดวก', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text('$typefacilitiesenvironment', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('รูปสภาพแวดล้อม',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('รูปสภาพแวดล้อม', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Container(
               height: 100,
@@ -586,8 +531,7 @@ class _LitlEditState extends State<LitlEdit> {
                       height: 50,
                     )),
               ),
-              Text("ส่วนที่ 4 ข้อมูลเครือญาติผู้ป่วย",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("ส่วนที่ 4 ข้อมูลเครือญาติผู้ป่วย", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               Expanded(
                 child: new Container(
                     margin: const EdgeInsets.only(left: 15.0, right: 10.0),
@@ -598,8 +542,7 @@ class _LitlEditState extends State<LitlEdit> {
               ),
             ]),
             SizedBox(height: 10),
-            Text('ข้อมูลความสัมพันธ์กับสมาชิกในครอบครัว',
-                style: TextStyle(fontSize: 16)),
+            Text('ข้อมูลความสัมพันธ์กับสมาชิกในครอบครัว', style: TextStyle(fontSize: 16)),
             SizedBox(height: 30),
             Column(
               children: [
@@ -611,10 +554,7 @@ class _LitlEditState extends State<LitlEdit> {
                       radius: 50,
                       backgroundColor: const Color(0xfff29a94),
                       child: Text('บิดา',
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white),
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                           textAlign: TextAlign.center),
                     ))),
                     Expanded(
@@ -623,10 +563,7 @@ class _LitlEditState extends State<LitlEdit> {
                       radius: 50,
                       backgroundColor: const Color(0xfff29a94),
                       child: Text('มารดา',
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white),
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                           textAlign: TextAlign.center),
                     ))),
                   ],
@@ -635,15 +572,11 @@ class _LitlEditState extends State<LitlEdit> {
                   children: [
                     Expanded(
                       child: Text('ชื่อ-สกุล :$familynameoneFamily',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center),
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                     ),
                     Expanded(
                       child: Text('ชื่อ-สกุล :$familynametwoFamily',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center),
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                     ),
                   ],
                 ),
@@ -651,15 +584,11 @@ class _LitlEditState extends State<LitlEdit> {
                   children: [
                     Expanded(
                       child: Text('อาชีพ : $occupationoneFamily',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center),
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                     ),
                     Expanded(
                       child: Text('อาชีพ : $occupationtwoFamily',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center),
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                     ),
                   ],
                 ),
@@ -776,10 +705,7 @@ class _LitlEditState extends State<LitlEdit> {
                       radius: 50,
                       backgroundColor: const Color(0xfff29a94),
                       child: Text('ลูกคนที่ 1',
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white),
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                           textAlign: TextAlign.center),
                     ))),
                     Expanded(
@@ -788,10 +714,7 @@ class _LitlEditState extends State<LitlEdit> {
                       radius: 50,
                       backgroundColor: const Color(0xfff29a94),
                       child: Text('ลูกคนที่ 2',
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white),
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                           textAlign: TextAlign.center),
                     ))),
 
@@ -816,15 +739,11 @@ class _LitlEditState extends State<LitlEdit> {
                   children: [
                     Expanded(
                       child: Text('ชื่อ-สกุล : $familynamethreeFamily',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center),
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                     ),
                     Expanded(
                       child: Text('ชื่อ-สกุล : $familynamefourFamily',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center),
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                     ),
                   ],
                 ),
@@ -832,15 +751,11 @@ class _LitlEditState extends State<LitlEdit> {
                   children: [
                     Expanded(
                       child: Text('อาชีพ : $occupationthreeFamily',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center),
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                     ),
                     Expanded(
                       child: Text('อาชีพ : $occupationfourFamily',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center),
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                     ),
                   ],
                 ),
@@ -855,8 +770,7 @@ class _LitlEditState extends State<LitlEdit> {
                       height: 50,
                     )),
               ),
-              Text("ส่วนที่ 5 ข้อมูลผู้ดูแลผู้ป่วย",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("ส่วนที่ 5 ข้อมูลผู้ดูแลผู้ป่วย", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               Expanded(
                 child: new Container(
                     margin: const EdgeInsets.only(left: 15.0, right: 10.0),
@@ -867,22 +781,70 @@ class _LitlEditState extends State<LitlEdit> {
               ),
             ]),
             SizedBox(height: 10),
-            Text('ชื่อ-นามสุกล',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('ชื่อ-นามสุกล', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
-            Text('$curatorName', style: TextStyle(fontSize: 16)),
+            Text('${curatorName ?? 'ไม่มีข้อมูล'}', style: TextStyle(fontSize: 16)),
             SizedBox(height: 10),
-            Text('ข้อมูลที่สามารถติดต่อได้',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('ข้อมูลที่สามารถติดต่อได้', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
-            Text('$curatorAddress', style: TextStyle(fontSize: 16)),
+            Text('${curatorAddress ?? 'ไม่มีข้อมูล'}', style: TextStyle(fontSize: 16)),
+
+            Divider(
+              thickness: 2.0,
+              height: 48.0,
+            ),
+
+            // edit history dropdown list
+            // get log history
+            FutureBuilder(
+              future: FirebaseFirestore.instance.collection('sick').doc(widget.idcard).collection('logs').get(),
+              builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
+
+                if (!snapshot.hasData) {
+                  return Text('Loading...');
+                }
+
+                // get data from firebase
+                List<DocumentSnapshot> logDocument = snapshot.data!.docs;
+                return Center(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Color(0xfff29a94),
+                      borderRadius: BorderRadius.circular(32.0),
+                    ),
+                    child: DropdownButton(
+                      hint: Text('ประวัติบันทึกข้อมูล'),
+                      items: logDocument.map((doc) {
+                        // get datetime format
+                        DateTime date = DateTime.fromMillisecondsSinceEpoch(int.parse(doc['timestamp']));
+                        final datetimeTitle = DateFormat('dd MMMM yyyy').format(date);
+                        return DropdownMenuItem(
+                          child: Text(datetimeTitle),
+                          value: doc['timestamp'],
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        // find a doocument with docId = value
+                        // open new page with data
+                        dev.log('goto page with docId = $value');
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       )),
-      //นำทาง
 
+      //นำทาง
+      // FAB with speed dial
       floatingActionButton: SpeedDial(
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.edit),
         speedDialChildren: <SpeedDialChild>[
           SpeedDialChild(
             child: const Icon(Icons.edit),
@@ -997,22 +959,10 @@ class _LitlEditState extends State<LitlEdit> {
         actions: [
           TextButton(
             onPressed: () async {
-              await FirebaseFirestore.instance
-                  .collection('sick')
-                  .doc(widget.idcard)
-                  .delete();
-              await FirebaseFirestore.instance
-                  .collection('Health')
-                  .doc(widget.idcard)
-                  .delete();
-              await FirebaseFirestore.instance
-                  .collection('environment')
-                  .doc(widget.idcard)
-                  .delete();
-              await FirebaseFirestore.instance
-                  .collection('Family')
-                  .doc(widget.idcard)
-                  .delete();
+              await FirebaseFirestore.instance.collection('sick').doc(widget.idcard).delete();
+              await FirebaseFirestore.instance.collection('Health').doc(widget.idcard).delete();
+              await FirebaseFirestore.instance.collection('environment').doc(widget.idcard).delete();
+              await FirebaseFirestore.instance.collection('Family').doc(widget.idcard).delete();
               Navigator.pop(context);
               Navigator.pop(context);
             },

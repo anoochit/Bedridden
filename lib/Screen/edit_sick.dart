@@ -1,6 +1,7 @@
 // add developer for log message
 import 'dart:developer' as dev;
 
+import 'package:bedridden/models/sick_model.dart';
 import 'package:bedridden/utility/dialog.dart';
 import 'package:bedridden/widgets/show_progess.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -98,74 +99,24 @@ class _EditSickState extends State<EditSick> {
   }
 
   Future<Null> readAlldata() async {
-    // init firebase
-    await Firebase.initializeApp().then((value) async {
-      // TODO : let's check log exist ?
-      QuerySnapshot lastLog = await FirebaseFirestore.instance
-          .collection('sick')
-          .doc(widget.idcard)
-          .collection('logs')
-          .orderBy('timestamp', descending: true)
-          .get();
+    // TODO : let's check log exist ?
+    QuerySnapshot lastLog = await FirebaseFirestore.instance
+        .collection('sick')
+        .doc(widget.idcard)
+        .collection('logs')
+        .orderBy('timestamp', descending: true)
+        .get();
 
-      dev.log('found log data = ${lastLog.docs.length} items');
+    dev.log('found log data = ${lastLog.docs.length} items');
 
-      if (lastLog.docs.length == 0) {
-        dev.log("read master data");
-        // read master data
-        dev.log('read from docId - ${widget.idcard}');
-        FirebaseFirestore.instance.collection('sick').doc(widget.idcard).get().then((DocumentSnapshot event) {
-          dev.log('read master data');
-          DateTime dateTime = event['bond'].toDate();
-          DateFormat dateFormat = DateFormat('dd-MM-yyyy');
-          String bondStr = dateFormat.format(dateTime);
-
-          // TODO : set data
-          // set screen state
-          setState(() {
-            // set default data in some field
-            addressSick = event['address'];
-
-            // show bone string in
-            bondStatus = true;
-            bondSick = bondStr;
-
-            // convert to date for bone field default data
-            pickedDate = event['bond'].toDate();
-            dev.log(pickedDate.toString());
-
-            idCardSick = event['idCard'];
-            latSick = event['lat'].toString();
-            lngSick = event['lng'].toString();
-            levelSick = event['level'];
-            nameSick = event['name'];
-            nationalitySick = event['nationality'];
-            patientoccupationSick = event['patientoccupation'];
-            phoneSick = event['phone'];
-            raceSick = event['race'];
-            religionSick = event['religion'];
-            talentSick = event['talent'];
-            typeSexSick = event['typeSex'];
-            typeStatusSick = event['typeStatus'];
-            typeeducationlevelSick = event['typeeducation_level'].toString();
-            typepositionSick = event['typeposition'].toString();
-            urlImageSick = event['urlImage'];
-
-            // set data to text controller field
-            nameController.text = event["name"];
-            addressController.text = event["address"];
-            idcardController.text = event["idCard"];
-            phoneController.text = event["phone"];
-            patientoccupationController.text = event["patientoccupation"];
-            talentController.text = event["talent"];
-          });
-        });
-      } else {
-        // has log data
-        QueryDocumentSnapshot event = lastLog.docs.first;
-        // make a fordate time
+    if (lastLog.docs.length == 0) {
+      dev.log("read master data");
+      // read master data
+      dev.log('read from docId - ${widget.idcard}');
+      FirebaseFirestore.instance.collection('sick').doc(widget.idcard).get().then((DocumentSnapshot event) {
+        dev.log('read master data');
         DateTime dateTime = event['bond'].toDate();
-        DateFormat dateFormat = DateFormat('dd-MMMM-yyyy', 'th');
+        DateFormat dateFormat = DateFormat('dd-MM-yyyy');
         String bondStr = dateFormat.format(dateTime);
 
         // TODO : set data
@@ -207,8 +158,55 @@ class _EditSickState extends State<EditSick> {
           patientoccupationController.text = event["patientoccupation"];
           talentController.text = event["talent"];
         });
-      }
-    });
+      });
+    } else {
+      // has log data
+      QueryDocumentSnapshot event = lastLog.docs.first;
+      // make a fordate time
+      DateTime dateTime = event['bond'].toDate();
+      DateFormat dateFormat = DateFormat('dd-MMMM-yyyy', 'th');
+      String bondStr = dateFormat.format(dateTime);
+
+      // TODO : set data
+      // set screen state
+      setState(() {
+        // set default data in some field
+        addressSick = event['address'];
+
+        // show bone string in
+        bondStatus = true;
+        bondSick = bondStr;
+
+        // convert to date for bone field default data
+        pickedDate = event['bond'].toDate();
+        dev.log(pickedDate.toString());
+
+        idCardSick = event['idCard'];
+        latSick = event['lat'].toString();
+        lngSick = event['lng'].toString();
+        levelSick = event['level'];
+        nameSick = event['name'];
+        nationalitySick = event['nationality'];
+        patientoccupationSick = event['patientoccupation'];
+        phoneSick = event['phone'];
+        raceSick = event['race'];
+        religionSick = event['religion'];
+        talentSick = event['talent'];
+        typeSexSick = event['typeSex'];
+        typeStatusSick = event['typeStatus'];
+        typeeducationlevelSick = event['typeeducation_level'].toString();
+        typepositionSick = event['typeposition'].toString();
+        urlImageSick = event['urlImage'];
+
+        // set data to text controller field
+        nameController.text = event["name"];
+        addressController.text = event["address"];
+        idcardController.text = event["idCard"];
+        phoneController.text = event["phone"];
+        patientoccupationController.text = event["patientoccupation"];
+        talentController.text = event["talent"];
+      });
+    }
   }
 
   Future<Null> checkPermission() async {
@@ -363,51 +361,84 @@ class _EditSickState extends State<EditSick> {
             padding: EdgeInsets.only(top: 16, left: 16, right: 8),
             child: Column(
               children: [
+                // shoul group as single widget
+
+                // image
                 titleImage(),
                 buildSizeBox(),
                 buildImage(),
                 buildSizeBox(),
                 controllerImage(),
                 buildSizeBox(),
+
+                // name
                 titleName(),
                 buildSizeBox(),
                 fieldName(),
                 buildSizeBox(),
+
+                // id card
                 titleidcard(),
                 buildSizeBox(),
                 fieldidcard(),
                 buildSizeBox(),
+
+                // address
                 titleAddress(),
                 buildSizeBox(),
                 fieldAddress(),
                 buildSizeBox(),
+
+                // phone
                 titlePhone(),
                 buildSizeBox(),
                 fieldPhone(),
                 buildSizeBox(),
+
+                // date of birth
                 titlebond(),
                 buildSizeBox(),
                 buildBond(),
+
+                // gender
                 titleGendle(),
                 radioGendle(),
                 groupStatus(),
                 buildSizeBox(),
+
+                // education
                 groupTypeeducation(),
                 buildSizeBox(),
+
+                // occupation
                 titlepatientoccupation(),
                 buildSizeBox(),
                 fieldpatientoccupation(),
                 buildSizeBox(),
+
+                // talent
                 titletalent(),
                 buildSizeBox(),
                 fieldtalent(),
                 buildSizeBox(),
+
+                // patien geo-location
                 groupPosition(),
                 buildSizeBox(),
+
+                // patient race
                 buildrace(),
+
+                // patient race
                 buildnationality(),
+
+                //race
                 buildreligion(),
+
+                // level
                 buildlevel(),
+
+                // map
                 buildMap(),
               ],
             ),
@@ -431,6 +462,7 @@ class _EditSickState extends State<EditSick> {
     // prepare data to your map so this should change to model
     // var data = {
     //   'name': nameController.text,
+    //    ...
     //    ...
     // }
     map['name'] = nameController.text;
@@ -463,11 +495,8 @@ class _EditSickState extends State<EditSick> {
 
       dev.log('### map ==>> $map');
 
-      // save data to firestore
-      await Firebase.initializeApp().then((value) async {
-        // add to log data
-        saveData(map: map, timeStamp: timeStamp);
-      });
+      // add to log data
+      saveData(map: map, timeStamp: timeStamp);
     } else {
       dev.log("file is not null so, upload image and save data");
       // upload file then add data to firesore
@@ -494,16 +523,14 @@ class _EditSickState extends State<EditSick> {
 
   // save data to firestore
   saveData({required Map<String, dynamic> map, required String timeStamp}) async {
-    await Firebase.initializeApp().then((value) async {
-      // add to log data
-      await FirebaseFirestore.instance
-          .collection('sick')
-          .doc(widget.idcard)
-          .collection('logs')
-          .doc(timeStamp)
-          .set(map)
-          .then((value) => Navigator.pop(context));
-    });
+    // add to log data
+    await FirebaseFirestore.instance
+        .collection('sick')
+        .doc(widget.idcard)
+        .collection('logs')
+        .doc(timeStamp)
+        .set(map)
+        .then((value) => Navigator.pop(context));
   }
 
   Set<Marker> setMarker() => <Marker>{

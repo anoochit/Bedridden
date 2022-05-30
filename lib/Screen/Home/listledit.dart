@@ -821,7 +821,7 @@ class _LitlEditState extends State<LitlEdit> {
                       items: logDocument.map((doc) {
                         // get datetime format
                         DateTime date = DateTime.fromMillisecondsSinceEpoch(int.parse(doc['timestamp']));
-                        final datetimeTitle = DateFormat('dd MMMM yyyy').format(date);
+                        final datetimeTitle = DateFormat('dd MMMM yyyy HH:mm').format(date);
                         return DropdownMenuItem(
                           child: Text(datetimeTitle),
                           value: doc['timestamp'],
@@ -836,6 +836,11 @@ class _LitlEditState extends State<LitlEdit> {
                   ),
                 );
               },
+            ),
+
+            Divider(
+              thickness: 2.0,
+              height: 48.0,
             ),
           ],
         ),
